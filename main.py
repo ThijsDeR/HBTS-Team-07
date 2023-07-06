@@ -2,10 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from math import cos, sin, pi
 from bluetooth import Arduino
+from speechToWord import SpeechToWord
 
 root = tk.Tk()
 
 bluetooth = Arduino("COM3", 9600)
+speechToWord = SpeechToWord()
 
 def move_forward():
     bluetooth.send_command(bluetooth.forward)
@@ -56,6 +58,17 @@ def stop():
     speed_bar.config(value=0)
     # steering_label.config(text="Steering: 0%")
     update_steering_indicator(0)
+
+def mic():
+    label.config(text="Using Mic")
+    reset_labels()
+    mic_label.config(bg="grey", fg="white")
+    speed_label.config(text="100%")
+    speed_bar.config(value=100)
+    # steering_label.config(text="Steering: 0%")
+    update_steering_indicator(0)
+    word = speechToWord.get_word_from_speech()
+    bluetooth.send_command(bluetooth.word_to_command(word))
 
 def reset_labels():
     forward_label.config(bg="white", fg="black")
@@ -132,6 +145,9 @@ right_label.grid(row=1, column=2, padx=5, pady=5)
 stop_label = tk.Label(label_frame, text="STOP", font=("Arial", 24), fg="black", bg="white")
 stop_label.grid(row=1, column=1, padx=5, pady=5)
 
+mic_label = tk.Label(label_frame, text="Mic", font=("Arial", 24), fg="black", bg="white")
+mic_label.grid(row=2, column=2, padx=5, pady=5)
+
 
 steering_label = tk.Label(root, text="Steering: 0%", font=("Arial", 18), fg="black", bg="white")
 steering_label.pack(pady=10)
@@ -166,5 +182,10 @@ right_button.grid(row=1, column=2, padx=5, pady=5)
 
 stop_button = tk.Button(button_frame, text="STOP", command=stop, width=10)
 stop_button.grid(row=1, column=1, padx=5, pady=5)
+
+mic_button = tk.Button(button_frame, text="MIC", command=mic, width=10)
+mic_button.grid(row=2, column=2, padx=5, pady=5)
+
+
 
 root.mainloop()

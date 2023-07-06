@@ -1,10 +1,7 @@
 import speech_recognition as sr
 
-
-
-class Arduino:
-
-    def __init__(self, com, baud_rate):
+class SpeechToWord:
+    def __init__(self):
         self.recognizer = sr.Recognizer()
 
     def get_word_from_speech(self):
@@ -23,3 +20,4 @@ class Arduino:
             MyText = MyText.lower()
             return MyText
 
+    

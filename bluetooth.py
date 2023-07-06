@@ -22,3 +22,11 @@ class Arduino:
     def send_command(self, command):
         self.bluetooth.write(command.encode())
 
+    def word_to_command(self, word):
+        if word == "forward": return self.forward
+        if word == "backward": return self.backward
+        if word == "right": return self.right
+        if word == "left": return self.left
+        if word == "stop": return self.stop
+        if word == "spin": return self.spin
+
