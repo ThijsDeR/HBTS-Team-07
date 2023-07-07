@@ -3,11 +3,15 @@ from tkinter import ttk
 from math import cos, sin, pi
 from bluetooth import Arduino
 from speechToWord import SpeechToWord
+from controller import Controller
+import time
 
 root = tk.Tk()
 
 bluetooth = Arduino("COM3", 9600)
 speechToWord = SpeechToWord()
+controller = Controller()
+using_controller = False;
 
 def move_forward():
     bluetooth.send_command(bluetooth.forward)
@@ -60,6 +64,7 @@ def stop():
     update_steering_indicator(0)
 
 def mic():
+    print("doing mic")
     label.config(text="Using Mic")
     reset_labels()
     mic_label.config(bg="grey", fg="white")
@@ -68,7 +73,10 @@ def mic():
     # steering_label.config(text="Steering: 0%")
     update_steering_indicator(0)
     word = speechToWord.get_word_from_speech()
-    bluetooth.send_command(bluetooth.word_to_command(word))
+    print(word)
+    command = bluetooth.word_to_command(word)
+    print(command)
+    if command: bluetooth.send_command(bluetooth.word_to_command(word))
 
 def reset_labels():
     forward_label.config(bg="white", fg="black")
@@ -76,6 +84,29 @@ def reset_labels():
     left_label.config(bg="white", fg="black")
     right_label.config(bg="white", fg="black")
     stop_label.config(bg="white", fg="black")
+
+def control():
+    global using_controller
+    using_controller = not using_controller
+    label.config(text="Using Controller")
+    reset_labels()
+    if (not using_controller): return
+    controller_label.config(bg="grey", fg="white")
+    speed_label.config(text="100%")
+    speed_bar.config(value=100)
+    # steering_label.config(text="Steering: 0%")
+    update_steering_indicator(0)
+    while(using_controller):
+        controllerDict = controller.read_controller()
+        using_controller = not controllerDict["quiting"]
+        print(controllerDict)
+        bluetooth.send_command(
+            f"buffer:{controllerDict['left']}:{controllerDict['right']}:{controllerDict['forward']}:{controllerDict['backward']};"
+        )
+        time.sleep(0.2)
+
+
+    
 
 
 # Create a Canvas widget
@@ -148,6 +179,9 @@ stop_label.grid(row=1, column=1, padx=5, pady=5)
 mic_label = tk.Label(label_frame, text="Mic", font=("Arial", 24), fg="black", bg="white")
 mic_label.grid(row=2, column=2, padx=5, pady=5)
 
+controller_label = tk.Label(label_frame, text="Mic", font=("Arial", 24), fg="black", bg="white")
+controller_label.grid(row=2, column=0, padx=5, pady=5)
+
 
 steering_label = tk.Label(root, text="Steering: 0%", font=("Arial", 18), fg="black", bg="white")
 steering_label.pack(pady=10)
@@ -185,6 +219,9 @@ stop_button.grid(row=1, column=1, padx=5, pady=5)
 
 mic_button = tk.Button(button_frame, text="MIC", command=mic, width=10)
 mic_button.grid(row=2, column=2, padx=5, pady=5)
+
+controller_button = tk.Button(button_frame, text="CONTROLLER", command=control, width=10)
+controller_button.grid(row=2, column=0, padx=5, pady=5)
 
 
 

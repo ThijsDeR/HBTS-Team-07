@@ -19,14 +19,21 @@ class Arduino:
             parity=serial.PARITY_EVEN,
             stopbits=serial.STOPBITS_ONE
         )
+
     def send_command(self, command):
         self.bluetooth.write(command.encode())
 
+    def send_multiple_commands(self, commands):
+        for command in commands:
+            self.bluetooth.write(command.encode())
+
+
     def word_to_command(self, word):
         if word == "forward": return self.forward
-        if word == "backward": return self.backward
+        if word == "backwards": return self.backward
         if word == "right": return self.right
         if word == "left": return self.left
         if word == "stop": return self.stop
         if word == "spin": return self.spin
+        return None
 
